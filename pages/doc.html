@@ -1,0 +1,80 @@
+<h1 id="doc-title">doc Title</h1>
+<div class="row">
+  <div class="col-md-3">
+    <h3>Chapter List</h3>
+    <button class="form-control" onclick = "chapter.add()">Add Chapter</button>
+    <div id="structure"></div>
+  </div>
+  <div class="col-md-9">
+    <div id="chapter" style="display:none;">
+      <h3 id="chapter-title">Chapter Title</h3>
+
+      <div id="chapter-view">
+        <button class="form-control" onclick="chapter.edit()">Edit Chapter</button>
+        <div id="chapter-content"></div>
+      </div>
+
+      <div id="chapter-edit" style="display:none">
+        <div id="edit-chapter-form" class="form-horizontal">
+          <div class="form-group">
+            <div class="col-md-12">
+              <label>Title</label>
+              <input id="chapter-title-input" class="form-control" type="text"></input>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-md-12">
+                <label>Content</label>
+                <textarea id="chapter-text" class="form-control" row="20"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-md-6">
+              <button class="form-control" onclick="chapter.edit()">Submit</button>
+            </div>
+            <div class="col-md-6">
+              <button class="form-control" onclick="$('#chapter-view').show();$('#chapter-edit').hide()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="add-chapter-form" class="form-horizontal" style="display:none">
+      <div class="form-group">
+        <div class="col-md-3">
+          <label>Chapter Title</label>
+        </div>
+        <div class="col-md-9">
+          <input type="text" class="form-control" id="new-chapter-title"></input>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-3">
+          <label>Add To</label>
+        </div>
+        <div class="col-md-9">
+          <select class="form-control" id="new-chapter-destination" onchange="chapterForm.renderSelectedChildren()"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-3">
+          <label>After</label>
+        </div>
+        <div class="col-md-9">
+          <select class="form-control" id="new-chapter-position"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-6">
+          <button class="form-control" onclick = "chapter.add()">Submit</button>
+        </div>
+        <div class="col-md-6">
+          <button class="form-control" onclick = "$('#add-chapter-form').hide();$('#chapter').show();">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
