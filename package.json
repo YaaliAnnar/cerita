@@ -1,0 +1,15 @@
+{
+  "name": "writer",
+  "version": "1.0.0",
+  "description": "Writer",
+  "main": "index.js",
+  "scripts": {
+    "test": "console.log('');"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+		"express":"latest",
+		"body-parser":"latest"
+  }
+}

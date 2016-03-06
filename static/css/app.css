@@ -1,0 +1,24 @@
+textarea.form-control {
+    resize: true;
+    overflow: hidden;
+    min-height: 150px;
+}
+
+.structure {
+  padding-top: 5px;
+  padding-left: 10px;
+}
+
+.structure>a{
+    font-size: 14px;
+    padding-right: 7px;
+}
+
+.structure.selected>a{
+  color: white;
+  background-color: black
+}
+
+.structure.hidden-children>div {
+  display: none;
+}
