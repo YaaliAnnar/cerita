@@ -1,4 +1,5 @@
 var chapter = {
+    index: 0,
     id: '',
     title: '',
     text: '',
@@ -74,42 +75,38 @@ var chapter = {
       $('#chapter-title').text(this.title);
     },
     add: function() {
-        var form = $('#add-chapter-form');
+        var form = $('#chapter-form');
         var chapter = $('#chapter');
         if (form.is(":visible")) {
-            var title = $('#new-chapter-title').val();
-            if (title.length == 0) {
+            this.id     = utility.generateId();
+            this.title  = $('#new-chapter-title').val();
+            this.parent = $('#new-chapter-parent').val();
+            this.index  = $('#new-chapter-index').val()*1;
+            this.docId  = doc.id;
+            if (this.title.length == 0) {
                 alert('Enter Chapter Title');
             } else {
-                $.post(
-                    '/add_chapter', {
-                        docId: doc.id,
-                        title: $('#new-chapter-title').val(),
-                        destination: $('#new-chapter-destination').val(),
-                        position: $('#new-chapter-position').val()
-                    },
-                    function(response) {
-                        doc.selectedChapter = response;
-                        doc.getStructure();
-                        this.mode = 'edit';
-                        form.hide();
-                        resolveRoute('#/doc/'+doc.id+'/'+this.id);
-                    }.bind(this)
-                );
+                doc.structure.push(this);
+                doc.reindexStructure(this.parent);
+                console.log(doc.structure);
+                doc.save();
+                $.post('/chapter/save',this,function(response){
+                  form.modal('hide');
+                  resolveRoute('#/doc/'+doc.id+'/'+this.id);
+                }.bind(this));
             }
         } else {
-            var flatChapterList = chapterForm.renderFlatChapterList(doc.structure);
-            $('#new-chapter-destination').insertObject(flatChapterList);
-            chapterForm.renderSelectedChildren();
+            chapterForm.getParents();
+            chapterForm.getIndexes();
             chapter.hide();
-            form.show();
+            form.modal();
         }
     },
     open: function(id) {
       $.post(
-          '/open_chapter', {
+          '/chapter/get', {
               docId: doc.id,
-              chapterId: this.id
+              id: this.id
           },
           function(response) {
               $('#chapter').show();

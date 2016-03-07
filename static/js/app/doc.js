@@ -2,65 +2,84 @@ var doc = {
     id: '',
     title: '',
     structure: [],
+    treeStructure: [],
     add: function() {
         this.title = $('#new-title').val();
+        this.id = utility.generateId();
         if (this.title.length == 0) {
             alert('Enter doc title');
         } else {
             $.post(
-                '/create_doc', {
-                    title: this.title
-                },
+                '/doc/save', this,
                 function(response) {
-                    if (response.status == 'error') {
-                        alert(response.error);
-                    } else {
-                        this.id = response.docId;
-                        this.open();
-                    }
+                  this.open();
                 }.bind(this)
             );
         }
     },
+    save: function(){
+      $.post('/doc/save', this, this.get.bind(this));
+    },
     open: function() {
         if (!this.id) {
-            this.id = $('#saved-title').val();
+            this.id = $('#save-doc').val();
         }
 				if(this.id){
 					var url = '#/doc/' + this.id;
 					resolveRoute(url);
 				}
     },
-    getTitle: function() {
-        $.post('/doc_title', {
+    get: function() {
+        //console.log(this);
+        $.post('/doc/get', {
                 docId: this.id
             },
             function(response) {
-                this.title = response;
-                $('#doc-title').html(response);
+                //console.log(response);
+                //console.log(this);
+                this.setTitle(response.title);
+                this.setStructure(response.structure);
             }.bind(this)
         );
     },
-    getStructure: function() {
-        $.post(
-            '/doc_structure', {
-                docId: this.id
-            },
-            function(response) {
-                this.structure = response;
-                $('#structure').insertObject(getDocStructureHtml(this.structure));
-                $('.treeToggle').on('click', docStructureToggle);
-                if(chapter.id!=''){
-                  chapter.getTitle();
-                }
-            }.bind(this)
-        );
+    setTitle:  function(title){
+      this.title = title;
+      $('#doc-title').html(this.title);
     },
+    setStructure:  function(structure){
+      this.structure = structure;
+      $('#structure').insertObject(getDocStructureHtml());
+      $('.treeToggle').on('click', docStructureToggle);
+      if(chapter.id!=''){
+        chapter.getTitle();
+      }
+    },
+    reindexStructure: function(parent){
+      var children = this.structure.filter(function(child){
+        return child.parent == parent;
+      });
+      children.sort(function(a,b){
+        a.index - b.index;
+      });
+      children.forEach(function(child,index){
+        child.index = index;
+      });
+    }
 };
 
-var getDocStructureHtml = function(source) {
+
+var getDocStructureHtml = function(parent) {
     var result = [];
-    source.forEach(function(section) {
+    if(!parent){
+      parent = 'root';
+    }
+    var children = doc.structure.filter(function(nodes){
+      return nodes.parent == parent;
+    });
+    children.sort(function(a,b){
+      a.index - b.index;
+    });
+    children.forEach(function(section) {
         var sectionHtml = {
             tag: 'div',
             attributes: [{
@@ -86,11 +105,13 @@ var getDocStructureHtml = function(source) {
                 text: section.title
             }]
         };
+        var grandChildren = getDocStructureHtml(section.id);
+        if(grandChildren.length>0){
+          sectionHtml.children = sectionHtml.children.concat(grandChildren);
+        }
         if (section.children) {
-					  sectionHtml.children = sectionHtml.children.concat(getDocStructureHtml(section.children));
-        } else {
-						sectionHtml.children[0].text = '(o)';
-						sectionHtml.children[0].attributes[0].value = 'inert';
+          sectionHtml.children[0].text = '(o)';
+          sectionHtml.children[0].attributes[0].value = 'inert';
         }
         result.push(sectionHtml);
     });
@@ -109,67 +130,73 @@ docStructureToggle = function() {
 };
 
 var chapterForm = {
-    renderFlatChapterList: function(structure, parentIndex) {
-        var result = [];
-        if (!parentIndex) {
-            result.push([{
+    getParents: function(parent, depth) {
+        var subFunction = function(parent, depth){
+          var options = [];
+          if (!parent) {
+              options.push({
                 tag: 'option',
+                text: 'Document Root',
                 attributes: [{
-                    name: 'value',
-                    value: 'root'
-                }],
-                text: 'Document Root'
-            }]);
-            parentIndex = '';
-        } else {
-            parentIndex += '.';
-        }
-        structure.forEach(function(chapter, index) {
-            result.push({
+                  name: 'value',
+                  value: 'root'
+                }]
+              });
+              parent = 'root';
+          }
+          if (!depth) {
+              depth = 1;
+          }
+          var prefix = (new Array(depth)).join('-');
+          var children = doc.structure.filter(function(subNode){
+            return subNode.parent == parent;
+          });
+          children.forEach(function(subNode){
+            options.push({
                 tag: 'option',
-                text: parentIndex + index + ' ' + chapter.title,
+                text: prefix + subNode.title,
                 attributes: [{
-                    name: 'value',
-                    value: parentIndex + index
+                  name: 'value',
+                  value: subNode.id
                 }]
             });
-            if (chapter.children) {
-                result = result.concat(chapterForm.renderFlatChapterList(chapter.children, parentIndex + index));
+            var grandChildren = subFunction(subNode.id,depth+1);
+            if(grandChildren.length>0){
+              options = options.concat(grandChildren);
             }
-        });
-        return result;
-    },
-    renderSelectedChildren: function() {
-        var address = $('#new-chapter-destination').val();
-        var selectedChapter = doc.structure;
-        if (address != 'root') {
-            //console.log(address.split('.'));
-            address.split('.').forEach(function(nextDestination) {
-                selectedChapter = selectedChapter[nextDestination];
-                if (!selectedChapter.children) {
-                    selectedChapter.children = [];
-                }
-                selectedChapter = selectedChapter.children;
-            });
+          }.bind(this));
+          return options;
         }
+
+        var options = subFunction(parent,depth);
+        $('#new-chapter-parent').insertObject(options);
+    },
+    getIndexes: function() {
         var options = [{
             tag: 'option',
             attributes: [{
                 name: 'value',
-                value: 0
+                value: -1
             }],
             text: 'At the begining'
         }];
-        selectedChapter.forEach(function(chapter, index) {
-            options.push([{
-                tag: 'option',
-                attributes: [{
-                    name: 'value',
-                    value: index + 1
-                }],
-                text: 'After "' + chapter.title + '"'
-            }]);
+        var parent = $('#new-chapter-parent').val();
+        var children = doc.structure.filter(function(subNode){
+          return subNode.parent == parent;
         });
-        $('#new-chapter-position').insertObject(options);
+        children.sort(function(a,b){
+          return a.index - b.index;
+        });
+        children.forEach(function(subNode, index){
+          options.push({
+              tag: 'option',
+              attributes: [{
+                  name: 'value',
+                  value: index - 0.1
+              }],
+              text: subNode.title
+          });
+        });
+        $('#new-chapter-index').insertObject(options);
     }
 };

@@ -2,7 +2,7 @@ var global = {};
 
 var resolveRoute = function(url){
 	if(url){
-		console.log('Opening '+url);
+		//console.log('Opening '+url);
 		window.history.pushState('', 'Writer', url);
 	}
 	var hash = window.location.hash;
@@ -16,9 +16,9 @@ var resolveRoute = function(url){
 		switch(hash[1]){
 			case 'doc':
 				mainContainer.load('/page/doc',function(){
+					console.log(doc);
 					doc.id = hash[2];
-					doc.getTitle();
-					doc.getStructure();
+					doc.get();
 					if(hash[3]){
 						chapter.id = hash[3];
 						chapter.open();

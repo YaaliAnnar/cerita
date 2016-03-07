@@ -2,20 +2,20 @@ var home = {};
 
 home.getdocList = function(){
 	$.post(
-		'/doc_list',
+		'/doc/list',
 		function(response){
 				var options = [];
 				response.forEach(function(doc){
 						options.push({
 							tag: 'option',
-							text: doc.name,
+							text: doc.title,
 							attributes: [
 								{name: 'value', value : doc.id}
 							],
-							text: doc.name
+							text: doc.title
 						});
 				});
-				$('#saved-name').insertObject(options);
+				$('#save-doc').insertObject(options);
 		}
 	);
 };

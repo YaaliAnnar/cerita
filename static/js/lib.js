@@ -1,44 +1,48 @@
 //The rest
-var renderHtml = function(htmlObject) {
-  var result = '';
-  if(Array.isArray(htmlObject)){
-    htmlObject.forEach(function(element){
-      result+= renderHtml(element);
-    });
-  } else {
-    if(htmlObject.tag!=undefined){
-      result += '<' + htmlObject.tag;
-      result += ' ';
-      if(htmlObject.attributes !=undefined){
-        htmlObject.attributes.forEach(function(attribute){
-          result += attribute.name;
-          result += '="';
-          result += attribute.value;
-          result += '" ';
-        });
+var utility = {
+  generateId :  function(){
+    return (new Date()).getTime().toString(36);
+  },
+  renderHtml :  function(htmlObject) {
+    var result = '';
+    if(Array.isArray(htmlObject)){
+      htmlObject.forEach(function(element){
+        result+= this.renderHtml(element);
+      }.bind(this));
+    } else {
+      if(htmlObject.tag!=undefined){
+        result += '<' + htmlObject.tag;
+        result += ' ';
+        if(htmlObject.attributes !=undefined){
+          htmlObject.attributes.forEach(function(attribute){
+            result += attribute.name;
+            result += '="';
+            result += attribute.value;
+            result += '" ';
+          });
+        }
+        result += '>';
+        if(htmlObject.text != undefined){
+         result += htmlObject.text;
+        }
+        if(htmlObject.children != undefined){
+          result += utility.renderHtml(htmlObject.children);
+        }
+        result += '</' + htmlObject.tag + '>';
       }
-      result += '>';
-      if(htmlObject.text != undefined){
-       result += htmlObject.text;
-      }
-      if(htmlObject.children != undefined){
-        result += renderHtml(htmlObject.children);
-      }
-      result += '</' + htmlObject.tag + '>';
     }
+    return result;
   }
-  return result;
-}
+};
 
 var html = function(){
   this.structure = {};
 };
 
 html.prototype.render = function(){
-  renderHtml(this.structure);
+  utility.renderHtml(this.structure);
 };
 
-//Begin app
 
 //ɉQuery patching
 $.post =  function( url, data, callback) {
@@ -58,6 +62,6 @@ $.post =  function( url, data, callback) {
 $.fn.extend({
   insertObject: function(htmlObject){
     //console.log(renderHtml(htmlObject));
-    this.html(renderHtml(htmlObject));
+    this.html(utility.renderHtml(htmlObject));
   }
 });
