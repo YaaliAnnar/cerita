@@ -11,13 +11,15 @@ module.exports = function(app){
     if(true){
       if(inputDoc.structure){
         //Nullify paragraph and structure
-        inputDoc.structure.paragraph = [];
-        inputDoc.structure.text = '';
+        delete inputDoc.structure.paragraph;
+        delete inputDoc.structure.text;
         app.saveJson(['docs',inputDoc.id,'structure.json'],inputDoc.structure);
+      } else {
+        app.saveJson(['docs',inputDoc.id,'structure.json'],[]);
       }
     }
     //Nullify structure
-    inputDoc.structure = [];
+    delete inputDoc.structure;
     if(true){
       var newDoc = true;
       docList.forEach(function(doc,index){

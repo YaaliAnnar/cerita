@@ -22,3 +22,29 @@ textarea.form-control {
 .structure.hidden-children>div {
   display: none;
 }
+
+.structure>a.menu {
+  display: none;
+}
+
+.structure.mouseover>a.menu {
+  display: inline;
+}
+
+.context-menu {
+  display: none;
+  position: absolute;
+  z-index: 10;
+}
+
+.context-menu.active {
+  display: block;
+}
+
+#structure{
+  overflow: auto;
+}
+
+#chapter-content{
+  overflow: auto;
+}

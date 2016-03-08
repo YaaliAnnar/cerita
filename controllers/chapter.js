@@ -6,7 +6,12 @@ module.exports = function(app){
 
   app.post('/chapter/save', function(request,response){
     var inputChapter = request.body;
-    app.saveText(['docs',inputChapter.docId,inputChapter.id+'.txt']);
+    delete inputChapter.paragraphs;
+    delete inputChapter.mode;
+    if(!inputChapter.text){
+      inputChapter.text = '';
+    }
+    app.saveText(['docs',inputChapter.docId,inputChapter.id+'.txt'],inputChapter.text);
     response.send('success');
   });
 }

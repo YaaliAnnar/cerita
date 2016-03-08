@@ -4,6 +4,7 @@ var chapter = {
     title: '',
     text: '',
     mode: '',
+    docId: '',
     paragraphs: [],
     setText: function (text){
       this.text = text;
@@ -27,21 +28,28 @@ var chapter = {
       this.title = title;
     },
     edit: function() {
+        this.docId  = doc.id;
         var edit = $('#chapter-edit');
         var view = $('#chapter-view');
-
         if (edit.is(':visible')) {
+
+          this.text = $('#chapter-text').val();
+          this.title = $('#chapter-title-input').val();
+
+          doc.structure.forEach(function(member,index){
+            if(member.id == this.id){
+              doc.structure[index].title = this.title;
+            }
+          }.bind(this));
+          doc.save();
+
           $.post(
-              '/edit_chapter', {
-                  docId: doc.id,
-                  chapterId: this.id,
-                  chapterText:  $('#chapter-text').val(),
-                  chapterTitle: $('#chapter-title-input').val()
-              },
+              '/chapter/save', this,
               function(response) {
-                  doc.getStructure();
                   this.setText($('#chapter-text').val());
                   this.setTitle($('#chapter-title-input').val());
+                  view.show();
+                  edit.hide();
               }.bind(this)
           );
         } else {
@@ -55,7 +63,6 @@ var chapter = {
       var searchThrough = function(tree, id){
         var leaf = '';
         tree.forEach(function(branch){
-          //console.log(id,branch.id);
           if(leaf==''){
             if(id==branch.id){
               leaf = branch;
@@ -74,6 +81,12 @@ var chapter = {
       this.title = chapter.title;
       $('#chapter-title').text(this.title);
     },
+    addChildren: function(){
+      this.add();
+      $('#new-chapter-parent').val(doc.selectedChapter);
+      chapterForm.getIndexes();
+      $("#new-chapter-index option:last").attr("selected","selected");
+    },
     add: function() {
         var form = $('#chapter-form');
         var chapter = $('#chapter');
@@ -82,23 +95,28 @@ var chapter = {
             this.title  = $('#new-chapter-title').val();
             this.parent = $('#new-chapter-parent').val();
             this.index  = $('#new-chapter-index').val()*1;
+            this.text   = '';
             this.docId  = doc.id;
             if (this.title.length == 0) {
                 alert('Enter Chapter Title');
             } else {
+
                 doc.structure.push(this);
                 doc.reindexStructure(this.parent);
-                console.log(doc.structure);
                 doc.save();
                 $.post('/chapter/save',this,function(response){
-                  form.modal('hide');
+
+                  $('#chapter-form').modal('hide');
+                  $('.modal-backdrop').remove();
+                  this.mode = 'edit';
                   resolveRoute('#/doc/'+doc.id+'/'+this.id);
                 }.bind(this));
             }
         } else {
+            $('.chapter-btn').hide();
+            $('#chapter-add-button').show();
             chapterForm.getParents();
             chapterForm.getIndexes();
-            chapter.hide();
             form.modal();
         }
     },
@@ -113,11 +131,61 @@ var chapter = {
               this.setText(response);
               if(this.mode == 'edit'){
                 this.edit();
+                this.mode == 'view';
               }
           }.bind(this)
       );
       if(doc.structure.length>0){
         this.getTitle();
+      }
+    },
+    delete: function(){
+        var id = doc.selectedChapter;
+        var deletedIndex;
+        doc.structure.forEach(function(section,index){
+            if(section.id == id){
+              deletedIndex = index;
+            }
+        });
+        if(deletedIndex){
+          var parentId = doc.structure[deletedIndex].parent;
+          doc.structure.splice(deletedIndex,1);
+          doc.reindexStructure(parentId);
+          doc.save();
+        }
+    },
+    move: function(){
+      var id = doc.selectedChapter;
+      //console.log(id);
+      if(id){
+        this.id = id
+      }
+      var selectedChapter = doc.structure.filter(function(member){
+        return member.id == this.id;
+      }.bind(this));
+      //console.log(selectedChapter)
+      //var chapterForm = $('#chapter-form');
+      var selectedChapter = selectedChapter[0];
+      var form = $('#chapter-form');
+      if (form.is(":visible")) {
+          selectedChapter.parent = $('#new-chapter-parent').val();
+          selectedChapter.index  = $('#new-chapter-index').val()*1;
+          doc.reindexStructure(selectedChapter.parent);
+          doc.save();
+
+          this.open();
+
+          $('#chapter-form').modal('hide');
+          $('.modal-backdrop').remove();
+
+      } else {
+          $('.chapter-btn').hide();
+          $('#new-chapter-title').val(selectedChapter.title);
+          $('#chapter-move-button').show();
+
+          chapterForm.getParents();
+          chapterForm.getIndexes();
+          form.modal();
       }
     }
 };
