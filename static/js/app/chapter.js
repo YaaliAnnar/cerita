@@ -85,7 +85,6 @@ var chapter = {
       this.add();
       $('#new-chapter-parent').val(doc.selectedChapter);
       chapterForm.getIndexes();
-      $("#new-chapter-index option:last").attr("selected","selected");
     },
     add: function() {
         var form = $('#chapter-form');

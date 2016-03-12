@@ -47,18 +47,13 @@ var doc = {
     setStructure:  function(structure){
       this.structure = structure;
       $('#structure').insertObject(docStructure.getHtml());
+      $('#structure').scrollTo('#'+chapter.id);
       $('.treeToggle').on('click', docStructure.toggleBranch);
       $('.structure>a').on('contextmenu', function(){
         var id = $(this).parent().attr('id');
         console.log(id);
         window.doc.selectedChapter = id;
-        var x = window.mouseX();
-        var y = window.mouseY();
-        console.log(x,y);
-
-        $('#chapter-context-menu').show();
-        $('#chapter-context-menu').offset({ top:y, left:x})
-
+        window.showContextMenu('#chapter-context-menu');
         return false;
       });
       if(chapter.id!=''){

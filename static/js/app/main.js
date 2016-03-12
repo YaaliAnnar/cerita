@@ -48,9 +48,23 @@ var mouseY=function() {
      }
  }
 
+ var showContextMenu = function(menuSelector){
+	 var menu = $(menuSelector);
+	 var x = window.mouseX();
+	 var y = window.mouseY();
+	 var windowHeight = $(window).height();
+	 var menuHeight = menu.height();
+	 if(y > windowHeight-menuHeight){
+		 y = windowHeight-menuHeight;
+	 }
+	 //console.log(menuHeight);
+	 menu.show();
+	 menu.offset({ top:y, left:x});
+ };
+
  var hideContextMenu = function(){
 	 $('.context-menu').hide();
- }
+ };
 
  var setHeight = function() {
    windowHeight = $(window).innerHeight();

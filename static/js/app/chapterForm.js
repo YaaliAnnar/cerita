@@ -70,5 +70,6 @@ var chapterForm = {
           });
         });
         $('#new-chapter-index').insertObject(options);
+        $("#new-chapter-index option:last").attr("selected","selected");
     }
 };

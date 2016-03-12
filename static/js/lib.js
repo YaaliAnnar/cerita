@@ -63,5 +63,15 @@ $.fn.extend({
   insertObject: function(htmlObject){
     //console.log(renderHtml(htmlObject));
     this.html(utility.renderHtml(htmlObject));
+  },
+  scrollTo: function(target){
+    var target = $(target);
+    if(target.length>0){
+      var offset = target.offset().top - this.scrollTop();
+      console.log(offset);
+      if(offset > this.height()){
+          this.animate({scrollTop: offset}, 1000);
+      }
+   }
   }
 });

@@ -11,8 +11,11 @@ module.exports = function(app){
     if(true){
       if(inputDoc.structure){
         //Nullify paragraph and structure
-        delete inputDoc.structure.paragraph;
-        delete inputDoc.structure.text;
+        inputDoc.structure.forEach(function(node){
+          delete node.paragraphs;
+          delete node.text;
+          delete node.mode;
+        });
         app.saveJson(['docs',inputDoc.id,'structure.json'],inputDoc.structure);
       } else {
         app.saveJson(['docs',inputDoc.id,'structure.json'],[]);
@@ -58,6 +61,12 @@ module.exports = function(app){
         documentStructure = [];
         app.saveJson(['docs',docId,'structure.json'],documentStructure);
       }
+      documentStructure.forEach(function(node){
+        delete node.paragraphs;
+        delete node.text;
+        delete node.mode;
+        //console.log(node);
+      });
       result.structure = documentStructure;
     }
     response.send(result);
