@@ -11,6 +11,7 @@ module.exports = function(app){
     if(!inputChapter.text){
       inputChapter.text = '';
     }
+    //console.log(inputChapter);
     app.saveText(['docs',inputChapter.docId,inputChapter.id+'.txt'],inputChapter.text);
     response.send('success');
   });

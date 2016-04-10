@@ -74,6 +74,7 @@ app.use('/static', express.static('static'));
 app.get('/', function (request, response) {
   response.sendFile(__dirname+'/layout.html');
 });
+
 app.get('/page/:page', function (request, response) {
   var page = request.params.page;
   try {
@@ -81,6 +82,16 @@ app.get('/page/:page', function (request, response) {
       response.sendFile(__dirname+'/pages/'+page+'.html');
   } catch (e) {
       response.sendFile(__dirname+'/pages/404.html');
+  }
+});
+
+app.get('/template/:template', function (request, response) {
+  var template = request.params.template;
+  try {
+      fs.accessSync(__dirname+'/templates/'+template+'.html', fs.F_OK);
+      response.sendFile(__dirname+'/templates/'+template+'.html');
+  } catch (e) {
+      response.send('');
   }
 });
 

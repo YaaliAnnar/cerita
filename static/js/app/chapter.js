@@ -6,6 +6,11 @@ var chapter = {
     mode: '',
     docId: '',
     paragraphs: [],
+		wordCount: 0,
+		updateWordCount: function(){
+			this.wordCount = this.text.split(/ /).length;
+			$('#word-count').text(this.wordCount);
+		},
     setText: function (text){
       this.text = text;
       this.paragraphs = text.split(/[\r\n]+/);
@@ -23,6 +28,12 @@ var chapter = {
         });
       });
       $('#chapter-content').insertObject(paragraphHtml);
+      $('.paragraph').on('contextmenu', function(){
+        var id = $(this).attr('class');
+        paragraph.id = id.split(' ')[1];
+        window.showContextMenu('#paragraph-context-menu');
+        return false;
+      });
     },
     setTitle : function (title){
       this.title = title;
@@ -42,22 +53,26 @@ var chapter = {
             }
           }.bind(this));
           doc.save();
-
-          $.post(
-              '/chapter/save', this,
-              function(response) {
-                  this.setText($('#chapter-text').val());
-                  this.setTitle($('#chapter-title-input').val());
-                  view.show();
-                  edit.hide();
-              }.bind(this)
-          );
+          this.save();
+          //
+          view.show();
+          edit.hide();
         } else {
           $('#chapter-text').val(this.text);
           $('#chapter-title-input').val(this.title);
           view.hide();
           edit.show();
         }
+    },
+    save: function (){
+      this.docId  = doc.id;
+      $.post(
+          '/chapter/save', this,
+          function(response) {
+              this.mode = 'view';
+              this.open(this.id);
+          }.bind(this)
+      );
     },
     getTitle: function(){
       var searchThrough = function(tree, id){
@@ -132,6 +147,7 @@ var chapter = {
                 this.edit();
                 this.mode == 'view';
               }
+							this.updateWordCount();
           }.bind(this)
       );
       if(doc.structure.length>0){

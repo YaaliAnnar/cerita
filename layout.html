@@ -12,6 +12,7 @@
   <script src="/static/js/app/doc.js"></script>
   <script src="/static/js/app/chapter.js"></script>
   <script src="/static/js/app/chapterForm.js"></script>
+  <script src="/static/js/app/paragraph.js"></script>
   <script src="/static/js/app/main.js"></script>
 
 </head>
@@ -19,10 +20,15 @@
 <body onload="resolveRoute()" onclick="hideContextMenu()">
   <div id="main-container" class="container">
   </div>
-  <div id="chapter-context-menu" class="btn-group-vertical context-menu">
+  <nav id="chapter-context-menu" class="btn-group-vertical context-menu">
     <button type="button" class="btn" onclick="chapter.move()">Move</button>
     <button type="button" class="btn" onclick="chapter.delete()">Delete</button>
     <button type="button" class="btn" onclick="chapter.addChildren()">Add Children</button>
+  </nav>
+
+  <nav id="paragraph-context-menu" class="btn-group-vertical context-menu">
+    <button type="button" class="btn" onclick="paragraph.edit()">Edit</button>
+	  <button type="button" class="btn" onclick="paragraph.delete()">Delete</button>
   </nav>
 </body>
 
